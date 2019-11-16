@@ -58,28 +58,35 @@ class quaternion():
 
 
 class data():
-    def __init__(self, device=None):
+    def __init__(self, device=None, dataset='0'):
         if device == None:
             self.DEVICE = t.device("cuda" if t.cuda.is_available() else "cpu")
         else:
             self.DEVICE = t.device(device)
 
-        self.X_data = pd.read_table("src/pointdata/rot_x.txt", sep=' ', header=None)
+        if dataset == '0':
+            x_dir = "src/pointdata/rot_x.txt"
+            y_dir = "src/pointdata/rot_y.txt"
+        elif dataset == '1':
+            x_dir = "src/pointdata/zxl_x.txt"
+            y_dir = "src/pointdata/zxl_y.txt"
+
+        self.X_data = pd.read_table(x_dir, sep=' ', header=None)
         self.X_data = t.tensor(self.X_data.values).to(self.DEVICE)
         self.X_data -= t.mean(self.X_data, dim=0)
 
-        self.Y_data = pd.read_table("src/pointdata/rot_y.txt", sep=' ', header=None)
+        self.Y_data = pd.read_table(y_dir, sep=' ', header=None)
         self.Y_data = t.tensor(self.Y_data.values).to(self.DEVICE)
         self.Y_data -= t.mean(self.Y_data, dim=0)
 
 class problem1():
-    def __init__(self, device=None):
+    def __init__(self, device=None, dataset='0'):
         if device == None:
             self.DEVICE = t.device("cuda" if t.cuda.is_available() else "cpu")
         else:
             self.DEVICE = t.device(device)
 
-        self.data = data(device=self.DEVICE)
+        self.data = data(device=self.DEVICE, dataset=dataset)
         self.__calculate_X_and_Y()
 
     def __calculate_X_and_Y(self):
@@ -123,13 +130,13 @@ class problem1():
         print('The difference is: {}'.format(t.dist(self.data.Y_data.T, new_Y)) )
 
 class problem2():
-    def __init__(self, device=None):
+    def __init__(self, device=None, dataset='0'):
         if device == None:
             self.DEVICE = t.device("cuda" if t.cuda.is_available() else "cpu")
         else:
             self.DEVICE = t.device(device)
 
-        self.data = data(device=self.DEVICE)
+        self.data = data(device=self.DEVICE, dataset=dataset)
 
     def cal_A(self):
         A = t.zeros([4, 4], dtype=t.float, device=self.DEVICE)
