@@ -79,6 +79,7 @@ class data():
         self.Y_data = t.tensor(self.Y_data.values).to(self.DEVICE)
         self.Y_data -= t.mean(self.Y_data, dim=0)
 
+
 class problem1():
     def __init__(self, device=None, dataset='0'):
         if device == None:
@@ -112,22 +113,17 @@ class problem1():
         r = t.matmul(
             t.matmul(t.inverse(t.matmul(new_X.T, new_X)), new_X.T), new_Y)
         r = r.view(3, 3)
-        print(r)
         # start using SVD to process the matrix
         u, s, v = t.svd(r)
-
-        
         R = t.matmul(t.matmul(u, t.eye(3, dtype=t.double)), v.T)
-        print(t.dist(r, R))
         return R
 
     def validate(self):
         R = self.sovle_R()
-        new_Y = t.matmul(R,self.data.X_data.T)
+        new_Y = t.matmul(R, self.data.X_data.T)
+        print('The difference is: {}'.format(
+            t.dist(self.data.Y_data.T, new_Y)))
 
-        print(self.data.Y_data.T, self.data.Y_data.T.shape )
-        print(new_Y, new_Y.shape)
-        print('The difference is: {}'.format(t.dist(self.data.Y_data.T, new_Y)) )
 
 class problem2():
     def __init__(self, device=None, dataset='0'):
@@ -149,19 +145,17 @@ class problem2():
     def solve_q(self):
         A = self.cal_A()
         e, V = t.eig(A, True)
-        print(e, V)
         idx = t.argmax(e[:, 0])
         e1 = e[idx, 0]
-        q = quaternion(V[:,idx], device=self.DEVICE)
-        return e1, q, V
+        q = quaternion(V[:, idx], device=self.DEVICE)
+        return e1, q
 
     def validate(self):
         R = self.solve_q()[1].q2r()
-        new_Y = t.matmul(R,self.data.X_data.T.float())
+        new_Y = t.matmul(R, self.data.X_data.T.float())
+        print('The difference is: {}'.format(
+            t.dist(self.data.Y_data.T, new_Y.double())))
 
-        print(self.data.Y_data.T, self.data.Y_data.T.shape )
-        print(new_Y, new_Y.shape)
-        print('The difference is: {}'.format(t.dist(self.data.Y_data.T, new_Y.double())) )
 
 if __name__ == "__main__":
 

@@ -13,6 +13,7 @@ import func
 os.environ["CUDA_VISIBLE_DEVICES"] ='0'
 solution = func.problem1('cpu')
 R = solution.sovle_R()
-print(t.matmul(R.T, R))
 
+print('The result R matrix is:')
+print(R)
 solution.validate()

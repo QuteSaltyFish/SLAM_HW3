@@ -14,13 +14,10 @@ os.environ["CUDA_VISIBLE_DEVICES"] ='0'
 
 solution = func.problem2("cpu")
 
-e1, q, V= solution.solve_q()
+e1, q = solution.solve_q()
 
-print(e1, q)
-
+print('The result R matrix is:')
 print(q.q2r())
-R = q.q2r()
-print(t.matmul(R.T, R))
 # %%
 solution.validate()
 
