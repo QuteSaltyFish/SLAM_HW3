@@ -156,6 +156,57 @@ class problem2():
         print('The difference is: {}'.format(
             t.dist(self.data.Y_data.T, new_Y.double())))
 
+class problem3():
+    def __init__(self, device=None, dataset='0'):
+        if device == None:
+            self.DEVICE = t.device("cuda" if t.cuda.is_available() else "cpu")
+        else:
+            self.DEVICE = t.device(device)
+
+        self.data = data(device=self.DEVICE, dataset=dataset)
+
+    def x2hat(self, x):
+        """
+        The input array is supposed to be of shape [3,1]
+        """
+        x_hat = t.tensor([
+            [0, -x[2], x[1]],
+            [x[2], 0, -x[0]],
+            [-x[1], x[0], 0]
+        ], device=self.DEVICE)
+        return x_hat
+    
+    def Gauss_Newton(self, epoch=10):
+        R = t.randn([3,3], dtype=t.double, device=self.DEVICE)
+        for _ in range(epoch):
+            dTheta = self.dTheta(self.data.X_data, self.data.Y_data, R)
+            tmp = t.exp(self.x2hat(dTheta))
+            R = R*tmp
+
+            u, s, v = t.svd(R)
+            R = t.matmul(t.matmul(u, t.eye(3, dtype=t.double, device=self.DEVICE)), v.T)
+            self.validate(R)
+
+    def dTheta(self, X, Y, R):
+        J = []
+        Z = []
+        for i in range(X.shape[0]):
+            dJ = -self.x2hat(t.matmul(R, X[i].T))
+            dZ = Y[i] - t.matmul(R, X[i].T)
+            J.append(dJ)
+            Z.append(dZ)
+        J = t.cat(J, dim=0)
+        Z = t.cat(Z, dim=0)
+
+        dTheta = t.matmul(t.matmul(t.inverse(t.matmul(J.T, J)), J.T), Z)
+        return dTheta.view(-1,1)
+
+    def validate(self, R=None):
+        if type(R)== None:
+            R = self.solve_q()[1].q2r()
+        new_Y = t.matmul(R, self.data.X_data.T)
+        print('The difference is: {}'.format(
+            t.dist(self.data.Y_data.T, new_Y.double())))
 
 if __name__ == "__main__":
 
