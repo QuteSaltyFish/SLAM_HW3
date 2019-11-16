@@ -9,7 +9,12 @@ from mpl_toolkits.mplot3d import Axes3D
 import time
 import func
 
-os.environ["CUDA_VISIBLE_DEVICES"] ='1'
+os.environ["CUDA_VISIBLE_DEVICES"] ='0'
 
+solution = func.problem2("cpu")
 
+e1, q = solution.solve_q()
 
+print(e1, q)
+
+print(q.q2r())

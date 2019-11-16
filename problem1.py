@@ -10,7 +10,7 @@ import time
 
 import func 
 
-
 os.environ["CUDA_VISIBLE_DEVICES"] ='0'
-solution = func.problem1()
+solution = func.problem1('cpu')
 print(solution.sovle_R())
+
