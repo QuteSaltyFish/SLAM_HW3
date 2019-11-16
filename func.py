@@ -44,6 +44,7 @@ class quaternion():
         return out
         
 if __name__ == "__main__":
+    
     time_start=time.time()
     x = quaternion([1,2,3,4],device="cpu")
     y = quaternion([5,6,7,8],device="cpu")
