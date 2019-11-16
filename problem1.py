@@ -7,16 +7,21 @@ import matplotlib.animation as animation
 import pandas as pd 
 import time
 from mpl_toolkits.mplot3d import Axes3D 
+import time
+
+time_start=time.time()
 
 
-os.environ['CUDA_VISIABLE_DEVICE'] = '0'
+os.environ["CUDA_VISIBLE_DEVICES"] ='1'
 DEVICE = t.device("cuda" if t.cuda.is_available() else "cpu")
+DEVICE = t.device("cpu")
 #%%
 X_data = pd.read_table("src/rot_x.txt",sep=' ',header=None)
 X_data = t.tensor(X_data.values).to(DEVICE)
 
 Y_data = pd.read_table("src/rot_x.txt",sep=' ',header=None)
 Y_data = t.tensor(Y_data.values).to(DEVICE)
+
 
 # %%
 new_X = []
@@ -50,5 +55,6 @@ I = t.tensor([
 R = t.matmul(t.matmul(u,I), v)
 # %%
 print(R)
-
+time_end=time.time()
+print('time cost',time_end-time_start,'s')
 # %%
