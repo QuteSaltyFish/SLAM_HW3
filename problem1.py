@@ -12,5 +12,7 @@ import func
 
 os.environ["CUDA_VISIBLE_DEVICES"] ='0'
 solution = func.problem1('cpu')
-print(solution.sovle_R())
+R = solution.sovle_R()
+print(t.matmul(R.T, R))
 
+solution.validate()
