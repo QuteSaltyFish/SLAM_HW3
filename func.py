@@ -183,9 +183,12 @@ class problem3():
 
         for _ in range(epoch):
             dTheta = self.dTheta(self.data.X_data, self.data.Y_data, R)
-            tmp = t.exp(self.x2hat(dTheta))
-            R = R*tmp
+            # tmp = t.exp()
+            # R = R*tmp
 
+            exp = t.eye(3, dtype=t.double, device=self.DEVICE) + self.x2hat(dTheta)
+            R = np.matmul(R, exp)
+            
             u, s, v = t.svd(R)
             R = t.matmul(t.matmul(u, t.eye(3, dtype=t.double, device=self.DEVICE)), v.T)
             self.validate(R)
