@@ -179,7 +179,7 @@ class problem3():
         return x_hat
     
     def Gauss_Newton(self, epoch=10):
-        R = t.randn([3,3], dtype=t.double, device=self.DEVICE)
+        R = t.ones([3,3], dtype=t.double, device=self.DEVICE)
         u, s, v = t.svd(R)
         R = t.matmul(t.matmul(u, t.eye(3, dtype=t.double, device=self.DEVICE)), v.T)
 
