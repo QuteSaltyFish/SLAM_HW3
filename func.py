@@ -178,6 +178,9 @@ class problem3():
     
     def Gauss_Newton(self, epoch=10):
         R = t.randn([3,3], dtype=t.double, device=self.DEVICE)
+        u, s, v = t.svd(R)
+        R = t.matmul(t.matmul(u, t.eye(3, dtype=t.double, device=self.DEVICE)), v.T)
+
         for _ in range(epoch):
             dTheta = self.dTheta(self.data.X_data, self.data.Y_data, R)
             tmp = t.exp(self.x2hat(dTheta))

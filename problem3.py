@@ -12,6 +12,6 @@ import func
 
 os.environ["CUDA_VISIBLE_DEVICES"] ='0'
 
-solution = func.problem3("cpu",'0')
-solution.Gauss_Newton(10)
+solution = func.problem3("cpu",'1')
+solution.Gauss_Newton(100)
 
