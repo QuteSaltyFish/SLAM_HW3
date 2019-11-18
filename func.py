@@ -144,6 +144,8 @@ class problem2():
 
     def solve_q(self):
         A = self.cal_A()
+        print('A Matrix:')
+        print(A)
         e, V = t.eig(A, True)
         idx = t.argmax(e[:, 0])
         e1 = e[idx, 0]
