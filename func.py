@@ -24,6 +24,10 @@ class quaternion():
     def __str__(self):
         return str(self.data)
 
+    def __add__(self, other):
+        out = t.matmul(self.left_Quaternion(), other.data)
+        return quaternion(out, device=self.DEVICE)
+
     def left_Quaternion(self):
         x = self.data
         out = t.tensor([
@@ -52,7 +56,7 @@ class quaternion():
             [qv[2], 0, -qv[0]],
             [-qv[1], qv[0], 0]
         ], dtype=t.float, device=self.DEVICE)
-        R = (qw**2 - t.matmul(qv.T, qv))*t.eye(3) + \
+        R = (qw**2 - t.matmul(qv.T, qv))*t.eye(3, device=self.DEVICE) + \
             2*t.matmul(qv, qv.T) + 2*qw*qv_hat
         return R
 
@@ -119,10 +123,12 @@ class problem1():
         return R
 
     def validate(self):
-        R = self.sovle_R()
+        if type(R) == None:
+            R = self.solve_q()[1].q2r()
         new_Y = t.matmul(R, self.data.X_data.T)
-        print('The difference is: {}'.format(
-            t.dist(self.data.Y_data.T, new_Y)))
+        loss = t.dist(self.data.Y_data.T, new_Y.double())
+        print('The difference is: {}'.format(loss))
+        return loss
 
 
 class problem2():
@@ -153,10 +159,13 @@ class problem2():
         return e1, q
 
     def validate(self):
-        R = self.solve_q()[1].q2r()
-        new_Y = t.matmul(R, self.data.X_data.T.float())
-        print('The difference is: {}'.format(
-            t.dist(self.data.Y_data.T, new_Y.double())))
+        if type(R) == None:
+            R = self.solve_q()[1].q2r()
+        new_Y = t.matmul(R, self.data.X_data.T)
+        loss = t.dist(self.data.Y_data.T, new_Y.double())
+        print('The difference is: {}'.format(loss))
+        return loss
+
 
 class problem3():
     def __init__(self, device=None, dataset='0'):
@@ -177,23 +186,45 @@ class problem3():
             [-x[1], x[0], 0]
         ], device=self.DEVICE)
         return x_hat
-    
-    def Gauss_Newton(self, epoch=10):
-        R = t.randn([3,3], dtype=t.double, device=self.DEVICE)
+
+    def Gauss_Newton_R(self, epoch=10):
+        R = t.randn([3, 3], dtype=t.double, device=self.DEVICE)
         u, s, v = t.svd(R)
-        R = t.matmul(t.matmul(u, t.eye(3, dtype=t.double, device=self.DEVICE)), v.T)
+        R = t.matmul(
+            t.matmul(u, t.eye(3, dtype=t.double, device=self.DEVICE)), v.T)
 
         for _ in range(epoch):
             dTheta = self.dTheta(self.data.X_data, self.data.Y_data, R)
             # tmp = t.exp()
             # R = R*tmp
 
-            exp = t.eye(3, dtype=t.double, device=self.DEVICE) + self.x2hat(dTheta)
-            R = np.matmul(R, exp)
-            
+            exp = t.eye(3, dtype=t.double, device=self.DEVICE) + \
+                self.x2hat(dTheta)
+            R = t.matmul(R, exp)
+
             u, s, v = t.svd(R)
-            R = t.matmul(t.matmul(u, t.eye(3, dtype=t.double, device=self.DEVICE)), v.T)
+            R = t.matmul(
+                t.matmul(u, t.eye(3, dtype=t.double, device=self.DEVICE)), v.T)
             self.validate(R)
+
+    def Gauss_Newton_Q(self, epoch=10):
+        theta = t.randn(1)
+        Q = quaternion([t.cos(theta/2), t.sin(theta/2),
+                        t.sin(theta/2), t.sin(theta/2)], device=self.DEVICE)
+        norm = t.sum(Q.data.pow(2)).pow(1/2)
+        Q.data /= norm
+
+        for _ in range(epoch):
+            R = Q.q2r().double()
+            dTheta = self.dTheta(self.data.X_data, self.data.Y_data, R)
+            # tmp = t.exp()
+            # R = R*tmp
+            dQ = quaternion([1, *(dTheta/2)], device=self.DEVICE)
+            Q = Q + dQ
+            norm = t.sum(Q.data.pow(2)).pow(1/2)
+            Q.data /= norm
+
+            self.validate(Q.q2r().double())
 
     def dTheta(self, X, Y, R):
         J = []
@@ -207,14 +238,16 @@ class problem3():
         Z = t.cat(Z, dim=0)
 
         dTheta = t.matmul(t.matmul(t.inverse(t.matmul(J.T, J)), J.T), Z)
-        return dTheta.view(-1,1)
+        return dTheta.view(-1, 1)
 
     def validate(self, R=None):
-        if type(R)== None:
+        if type(R) == None:
             R = self.solve_q()[1].q2r()
         new_Y = t.matmul(R, self.data.X_data.T)
-        print('The difference is: {}'.format(
-            t.dist(self.data.Y_data.T, new_Y.double())))
+        loss = t.dist(self.data.Y_data.T, new_Y.double())
+        print('The difference is: {}'.format(loss))
+        return loss
+
 
 if __name__ == "__main__":
 

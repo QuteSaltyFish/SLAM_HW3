@@ -13,5 +13,12 @@ import func
 os.environ["CUDA_VISIBLE_DEVICES"] ='0'
 
 solution = func.problem3("cpu",'1')
-solution.Gauss_Newton(100)
+
+# solve the problem using the rotation matrix
+print('-'*100)
+
+solution.Gauss_Newton_R(100)
+# solve the problem using the quaterion
+print('-'*100)
+solution.Gauss_Newton_Q(100)
 
