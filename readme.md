@@ -1,1 +1,1 @@
-This is the third homwork of SLAM
+This is the third homework of SLAM
